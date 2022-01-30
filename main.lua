@@ -1,5 +1,15 @@
 function love.load()
 	wf = require('libraries.windfield.windfield')
+	anim8 = require('libraries.anim8.anim8')
+
+	sprites = {}
+	sprites.playerSheet = love.graphics.newImage('sprites/playerSheet.png')
+
+	local grid = anim8.newGrid(614, 564, sprites.playerSheet:getWidth(), sprites.playerSheet:getHeight())
+
+	animations = {}
+	animations.idle = anim8.newAnimation(grid('1-15', 1), .05)
+
 	world = wf.newWorld(0, 500, false)
 
 	world:addCollisionClass('Player')
@@ -40,10 +50,14 @@ function love.update(dt)
 			player:destroy()
 		end
 	end
+
+	animations.idle:update(dt)
 end
 
 function love.draw()
 	world:draw()
+
+	animations.idle:draw(sprites.playerSheet, 0, 0)
 end
 
 function love.keypressed(key)

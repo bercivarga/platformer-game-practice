@@ -3,3 +3,6 @@
 
 # libraries
 libraries/
+
+# misc
+.DS_Store
