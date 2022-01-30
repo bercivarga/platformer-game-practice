@@ -10,6 +10,9 @@ function love.load()
 
 	player = world:newRectangleCollider(360, 100, 80, 80, {collision_class = "Player"})
 	player.speed = 240
+	player.maxJumps = 2
+	player.jumpsLeft = 2
+
 	player:setFixedRotation(true)
 
 	platform = world:newRectangleCollider(250, 400, 300, 100, {collision_class = "Platform"})
@@ -49,6 +52,12 @@ function love.keypressed(key)
 
 		if #colliders > 0 then
 			player:applyLinearImpulse(0, -5000)
+			player.jumpsLeft = player.maxJumps
+		else
+			player.jumpsLeft = player.jumpsLeft - 1
+			if player.jumpsLeft > 0 then
+				player:applyLinearImpulse(0, -5000)
+			end
 		end
 	end
 end
@@ -56,7 +65,7 @@ end
 function love.mousepressed(x, y, button)
 	if button == 1 then
 		local colliders = world:queryCircleArea(x, y, 200, {'Platform', 'Danger'})
-		for i,v in ipairs(colliders) do
+		for _,v in ipairs(colliders) do
 			v:destroy()
 		end
 	end
