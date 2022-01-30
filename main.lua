@@ -9,6 +9,8 @@ function love.load()
 
 	animations = {}
 	animations.idle = anim8.newAnimation(grid('1-15', 1), .05)
+	animations.jump = anim8.newAnimation(grid('1-7', 2), .05)
+	animations.run = anim8.newAnimation(grid('1-15', 3), .05)
 
 	world = wf.newWorld(0, 500, false)
 
@@ -22,6 +24,7 @@ function love.load()
 	player.speed = 240
 	player.maxJumps = 2
 	player.jumpsLeft = 2
+	player.animation = animations.run
 
 	player:setFixedRotation(true)
 
@@ -51,13 +54,13 @@ function love.update(dt)
 		end
 	end
 
-	animations.idle:update(dt)
+	player.animation:update(dt)
 end
 
 function love.draw()
 	world:draw()
 
-	animations.idle:draw(sprites.playerSheet, 0, 0)
+	player.animation:draw(sprites.playerSheet, 0, 0)
 end
 
 function love.keypressed(key)
