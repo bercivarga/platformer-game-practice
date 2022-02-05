@@ -20,11 +20,14 @@ function love.load()
 
 	world:setQueryDebugDrawing(true)
 
-	player = world:newRectangleCollider(360, 100, 80, 80, {collision_class = "Player"})
+	player = world:newRectangleCollider(360, 100, 40, 100, {collision_class = "Player"})
 	player.speed = 240
 	player.maxJumps = 2
 	player.jumpsLeft = 2
-	player.animation = animations.run
+	player.animation = animations.idle
+	player.isMoving = false
+	player.direction = 1 -- 1 is right, -1 is left
+	player.grounded = true
 
 	player:setFixedRotation(true)
 
@@ -39,14 +42,27 @@ function love.update(dt)
 	world:update(dt)
 
 	if player.body then
+		local colliders = world:queryRectangleArea(player:getX() - 20, player:getY() + 50, 40, 2, {'Platform'})
+		if #colliders > 0 then
+			player.grounded = true
+		else
+			player.grounded = false
+		end
+
+		player.isMoving = false
+
 		local px = player:getPosition()
 
 		if love.keyboard.isDown('d') then
 			player:setX(px + player.speed * dt)
+			player.isMoving = true
+			player.direction = 1
 		end
 
 		if love.keyboard.isDown('a') then
 			player:setX(px - player.speed * dt)
+			player.isMoving = true
+			player.direction = -1
 		end
 
 		if player:enter('Danger') then
@@ -54,26 +70,45 @@ function love.update(dt)
 		end
 	end
 
+if player.grounded then
+	if player.isMoving then
+		player.animation = animations.run
+	else
+		player.animation = animations.idle
+	end
+else
+	player.animation = animations.jump
+end
+
 	player.animation:update(dt)
 end
 
 function love.draw()
 	world:draw()
 
-	player.animation:draw(sprites.playerSheet, 0, 0)
+	if player.body == nil then
+		return
+	end
+
+	local px, py = player:getPosition()
+	player.animation:draw(sprites.playerSheet, px, py, nil, 0.25 * player.direction, 0.25, 130, 300)
 end
 
 function love.keypressed(key)
 	if key == 'space' or key == 'w' then
-		local colliders = world:queryRectangleArea(player:getX() - 40, player:getY() + 40, 80, 2, {'Platform'})
+		if player.body == nil then
+			return
+		end
 
-		if #colliders > 0 then
-			player:applyLinearImpulse(0, -5000)
+		local colliders = world:queryRectangleArea(player:getX() - 20, player:getY() + 50, 40, 2, {'Platform'})
+
+		if player.grounded then
+			player:applyLinearImpulse(0, -3000)
 			player.jumpsLeft = player.maxJumps
 		else
 			player.jumpsLeft = player.jumpsLeft - 1
 			if player.jumpsLeft > 0 then
-				player:applyLinearImpulse(0, -5000)
+				player:applyLinearImpulse(0, -3000)
 			end
 		end
 	end
