@@ -1,4 +1,6 @@
 function love.load()
+	love.window.setMode(1000, 768)
+
 	wf = require('libraries.windfield.windfield')
 	anim8 = require('libraries.anim8.anim8')
 
